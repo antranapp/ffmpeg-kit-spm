@@ -2,10 +2,11 @@
 set -e
 
 FFMPEG_KIT_TAG="min.v5.1.2.6"
-FFMPEG_KIT_CHECKOUT="origin/develop"
+FFMPEG_KIT_CHECKOUT="origin/main"
 #FFMPEG_KIT_CHECKOUT="origin/tags/$FFMPEG_KIT_TAG"
 
-FFMPEG_KIT_REPO="https://github.com/tylerjonesio/ffmpeg-kit"
+# FFMPEG_KIT_REPO="https://github.com/tylerjonesio/ffmpeg-kit"
+FFMPEG_KIT_REPO="https://github.com/arthenica/ffmpeg-kit"
 WORK_DIR=".tmp/ffmpeg-kit"
 
 if [[ ! -d $WORK_DIR ]]; then
@@ -25,17 +26,19 @@ git checkout $FFMPEG_KIT_CHECKOUT
 echo "Install build dependencies..."
 brew install autoconf automake libtool pkg-config curl git doxygen nasm bison wget gettext gh
 
-echo "Building for iOS..."
-./ios.sh --enable-ios-audiotoolbox --enable-ios-avfoundation --enable-ios-videotoolbox --enable-ios-zlib --enable-ios-bzip2 --no-bitcode --enable-gmp --enable-gnutls -x
-echo "Building for tvOS..."
-./tvos.sh --enable-tvos-audiotoolbox --enable-tvos-videotoolbox --enable-tvos-zlib --enable-tvos-bzip2 --no-bitcode --enable-gmp --enable-gnutls -x
+# echo "Building for iOS..."
+# ./ios.sh --enable-ios-audiotoolbox --enable-ios-avfoundation --enable-ios-videotoolbox --enable-ios-zlib --enable-ios-bzip2 --no-bitcode --enable-gmp --enable-gnutls -x
+# echo "Building for tvOS..."
+# ./tvos.sh --enable-tvos-audiotoolbox --enable-tvos-videotoolbox --enable-tvos-zlib --enable-tvos-bzip2 --no-bitcode --enable-gmp --enable-gnutls -x
 echo "Building for macOS..."
-./macos.sh --enable-macos-audiotoolbox --enable-macos-avfoundation --enable-macos-bzip2 --enable-macos-videotoolbox --enable-macos-zlib --enable-macos-coreimage --enable-macos-opencl --enable-macos-opengl --enable-gmp --enable-gnutls -x
-echo "Building for watchOS..."
+./macos.sh --enable-x264 --enable-gpl --enable-macos-audiotoolbox --enable-macos-avfoundation --enable-macos-bzip2 --enable-macos-videotoolbox --enable-macos-zlib --enable-macos-coreimage --enable-macos-opencl --enable-macos-opengl -x
+# echo "Building for watchOS..."
 #./watchos.sh --enable-watchos-zlib --enable-watchos-bzip2 --no-bitcode --enable-gmp --enable-gnutls -x
 
 echo "Bundling final XCFramework"
-./apple.sh --disable-watchos --disable-watchsimulator
+# ./apple.sh --disable-watchos --disable-watchsimulator --disable-appletvos --disable-appletvsimulator  --disable-iphoneos --disable-iphonesimulator --disable-mac-catalyst
+
+./apple.sh --disable-appletvos --disable-appletvsimulator  --disable-iphoneos --disable-iphonesimulator --disable-mac-catalyst
 
 cd ../../
 
@@ -63,26 +66,26 @@ sed -i '' -e "s/let frameworks =.*/let frameworks = [$PACKAGE_STRING]/" Package.
 echo "Copying License..."
 cp -f .tmp/ffmpeg-kit/LICENSE ./
 
-echo "Committing Changes..."
-git add -u
-git commit -m "Creating release for $FFMPEG_KIT_TAG"
+# echo "Committing Changes..."
+# git add -u
+# git commit -m "Creating release for $FFMPEG_KIT_TAG"
 
-echo "Creating Tag..."
-git tag $FFMPEG_KIT_TAG
-git push
-git push origin --tags
+# echo "Creating Tag..."
+# git tag $FFMPEG_KIT_TAG
+# git push
+# git push origin --tags
 
-echo "Creating Release..."
-gh release create -p -d $FFMPEG_KIT_TAG -t "FFmpegKit SPM $FFMPEG_KIT_TAG" --generate-notes --verify-tag
+# echo "Creating Release..."
+# gh release create -p -d $FFMPEG_KIT_TAG -t "FFmpegKit SPM $FFMPEG_KIT_TAG" --generate-notes --verify-tag
 
-echo "Uploading Binaries..."
-for f in $(ls "$XCFRAMEWORK_DIR")
-do
-    if [[ $f == *.zip ]]; then
-        gh release upload $FFMPEG_KIT_TAG "$XCFRAMEWORK_DIR/$f"
-    fi
-done
+# echo "Uploading Binaries..."
+# for f in $(ls "$XCFRAMEWORK_DIR")
+# do
+#     if [[ $f == *.zip ]]; then
+#         gh release upload $FFMPEG_KIT_TAG "$XCFRAMEWORK_DIR/$f"
+#     fi
+# done
 
-gh release edit $FFMPEG_KIT_TAG --draft=false
+# gh release edit $FFMPEG_KIT_TAG --draft=false
 
 echo "All done!"

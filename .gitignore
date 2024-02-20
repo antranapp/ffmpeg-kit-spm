@@ -92,3 +92,6 @@ iOSInjectionProject/
 .tmp/
 .swiftpm/
 .DS_STORE
+
+*.zip
+*.log
